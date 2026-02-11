@@ -18,55 +18,12 @@ logger = logging.getLogger("trading_signal_api.signal")
 router = APIRouter()
 
 
-@router.get(
-    "/signal/{symbol}",
-    response_model=SignalResponse,
-    responses={
-        200: {"description": "Signal analysis complete"},
-        404: {"description": "Symbol not found or no data available"},
-        422: {"description": "Invalid parameters"},
-        429: {"description": "Rate limit exceeded"},
-        500: {"description": "Internal server error"},
-        504: {"description": "External service timeout"},
-    },
-)
-@limiter.limit("60/minute")
-async def get_signal(
-    request: Request,
+async def _generate_signal(
     symbol: str,
-    timeframe: str = Query(
-        default="4h",
-        pattern="^(1h|4h|1d|1w)$",
-        description="Chart timeframe: 1h, 4h, 1d, or 1w",
-    ),
-    format: Literal["json", "text"] = Query(
-        default="json",
-        description="Response format: json or text",
-    ),
+    timeframe: str,
+    format: str,
 ) -> Union[SignalResponse, PlainTextResponse]:
-    """
-    Get comprehensive trading signal analysis for a crypto symbol.
-
-    This endpoint provides:
-    - Price information (current, 24h change)
-    - Technical analysis (trend, momentum, volume, volatility)
-    - Market structure analysis (support/resistance levels)
-    - Trading suggestion with entry, stop loss, and take profit levels
-    - Verbal analysis summary
-
-    **Supported Timeframes:**
-    - 1h: Hourly candles
-    - 4h: 4-hour candles (default)
-    - 1d: Daily candles
-    - 1w: Weekly candles
-
-    **Response Formats:**
-    - json: Structured JSON response
-    - text: Human-readable text format
-
-    **Payment:**
-    When accessed via APIX marketplace, x402 payments are handled by the platform.
-    """
+    """Core signal generation logic used by both endpoints."""
     symbol = symbol.upper().strip()
 
     provider = get_provider(api_key=settings.coingecko_api_key or None)
@@ -126,3 +83,73 @@ async def get_signal(
 
     logger.info(f"Signal generated for {symbol}/{timeframe}")
     return signal_response
+
+
+@router.get(
+    "/signal",
+    response_model=SignalResponse,
+    responses={
+        200: {"description": "Signal analysis complete"},
+        404: {"description": "Symbol not found or no data available"},
+        422: {"description": "Invalid parameters"},
+        429: {"description": "Rate limit exceeded"},
+        500: {"description": "Internal server error"},
+        503: {"description": "Data provider temporarily unavailable"},
+    },
+)
+@limiter.limit("60/minute")
+async def get_signal_query(
+    request: Request,
+    symbol: str = Query(
+        description="Crypto symbol (BTC, ETH, SOL) or full name (bitcoin, ethereum, solana)",
+    ),
+    timeframe: str = Query(
+        default="4h",
+        pattern="^(1h|4h|1d|1w)$",
+        description="Chart timeframe: 1h, 4h, 1d, or 1w",
+    ),
+    format: Literal["json", "text"] = Query(
+        default="json",
+        description="Response format: json or text",
+    ),
+) -> Union[SignalResponse, PlainTextResponse]:
+    """
+    Get trading signal analysis (query parameter version for APIX compatibility).
+
+    Use: /api/v1/signal?symbol=BTC&timeframe=4h
+    """
+    return await _generate_signal(symbol, timeframe, format)
+
+
+@router.get(
+    "/signal/{symbol}",
+    response_model=SignalResponse,
+    responses={
+        200: {"description": "Signal analysis complete"},
+        404: {"description": "Symbol not found or no data available"},
+        422: {"description": "Invalid parameters"},
+        429: {"description": "Rate limit exceeded"},
+        500: {"description": "Internal server error"},
+        503: {"description": "Data provider temporarily unavailable"},
+    },
+)
+@limiter.limit("60/minute")
+async def get_signal(
+    request: Request,
+    symbol: str,
+    timeframe: str = Query(
+        default="4h",
+        pattern="^(1h|4h|1d|1w)$",
+        description="Chart timeframe: 1h, 4h, 1d, or 1w",
+    ),
+    format: Literal["json", "text"] = Query(
+        default="json",
+        description="Response format: json or text",
+    ),
+) -> Union[SignalResponse, PlainTextResponse]:
+    """
+    Get trading signal analysis (path parameter version).
+
+    Use: /api/v1/signal/BTC?timeframe=4h
+    """
+    return await _generate_signal(symbol, timeframe, format)

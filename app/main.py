@@ -74,7 +74,8 @@ async def root():
         "version": "1.0.0",
         "docs": "/docs" if settings.debug else None,
         "endpoints": {
-            "signal": "/api/v1/signal/{symbol}",
+            "signal": "/api/v1/signal?symbol={symbol}",
+            "signal_alt": "/api/v1/signal/{symbol}",
             "health": "/health",
         },
     }
