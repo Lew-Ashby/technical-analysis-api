@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     # Configure pricing and wallet address in the APIX dashboard
 
     # CORS Settings (comma-separated string in .env)
-    cors_origins: str = "http://localhost:8000,http://127.0.0.1:8000"
+    cors_origins: str = "*"
 
     @field_validator("cors_origins", mode="before")
     @classmethod
