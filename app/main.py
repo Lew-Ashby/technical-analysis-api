@@ -53,11 +53,11 @@ async def log_requests(request: Request, call_next):
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Global exception handler - prevents stack trace leakage."""
+    """Global exception handler - shows error details for debugging."""
     logger.exception(f"Unhandled exception for {request.url.path}: {exc}")
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error"},
+        content={"detail": str(exc), "type": type(exc).__name__},
     )
 
 
