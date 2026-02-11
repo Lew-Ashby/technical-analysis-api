@@ -10,7 +10,6 @@ from app.models.analysis import (
 )
 from app.models.signal import (
     AnalysisInfo,
-    ChartDataInfo,
     LevelsInfo,
     MomentumInfo,
     PriceInfo,
@@ -35,7 +34,6 @@ def format_json_response(
     price_change_pct: float,
     indicators: TechnicalIndicators,
     suggestion: Optional[TradingSuggestion],
-    chart_data: Optional[ChartDataInfo] = None,
 ) -> SignalResponse:
     """Format technical analysis into SignalResponse JSON structure."""
     sanitized_symbol = _sanitize_symbol(symbol)
@@ -150,7 +148,6 @@ def format_json_response(
         ),
         trade=trade_info,
         summary=summary,
-        chart_data=chart_data,
     )
 
 

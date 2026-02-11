@@ -39,7 +39,7 @@ backend/
 │       ├── data_providers.py      # CoinGecko + Yahoo (MODIFY)
 │       ├── llm_analysis.py        # Claude integration (REMOVE)
 │       ├── cache.py               # TTL caching (KEEP)
-│       ├── chart_generator.py     # HTML charts (KEEP)
+│       ├── chart_generator.py     # HTML charts (REMOVED - not needed for APIX)
 │       ├── asset_registry.py      # 280+ crypto assets (KEEP)
 │       └── perp_calculator.py     # Perp math (REMOVE)
 └── tests/
@@ -82,7 +82,6 @@ GET /api/v1/signal/{symbol}
 Query Parameters:
   - timeframe: 1h | 4h | 1d | 1w (default: 4h)
   - format: json | text (default: json)
-  - include_chart: data | html | none (default: none)
 
 Headers Required:
   - X-PAYMENT: <x402 payment token>
@@ -158,8 +157,7 @@ Responses:
     "position_risk_pct": 2.38,
     "invalidation": "Close below $102,500"
   },
-  "summary": "BTC on the 4h timeframe shows bullish bias (score: +65/100, confidence: 78%)...",
-  "chart_data": null
+  "summary": "BTC on the 4h timeframe shows bullish bias (score: +65/100, confidence: 78%)..."
 }
 ```
 
@@ -303,7 +301,6 @@ async def get_signal(
     symbol: str,
     timeframe: str = Query(default="4h", pattern="^(1h|4h|1d|1w)$"),
     format: Literal["json", "text"] = Query(default="json"),
-    include_chart: Literal["data", "html", "none"] = Query(default="none"),
 ) -> Union[SignalResponse, PlainTextResponse]:
     """Get trading signal for a crypto symbol."""
     # Implementation using existing technical_analysis.py
@@ -401,7 +398,6 @@ rm app/services/llm_analysis.py
 - Uses `TechnicalAnalyzer` from existing services
 - Uses `CoinGeckoProvider` for data
 - Returns JSON or text based on format parameter
-- Optional chart_data inclusion
 
 ### 7.3 CREATE app/models/signal.py
 - `PriceInfo` model
@@ -498,7 +494,7 @@ class Settings(BaseSettings):
 |------|--------|------------|
 | CoinGecko rate limiting | Service degradation | Implement aggressive caching, add API key support |
 | x402 facilitator downtime | 402s fail | Fallback to direct payment verification |
-| Response size too large | Performance | Limit chart_data option, compress responses |
+| Response size too large | Performance | JSON response is optimized, no large data fields |
 | Breaking existing clients | Client errors | N/A - new API, clean break |
 
 ---

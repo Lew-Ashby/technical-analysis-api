@@ -75,15 +75,6 @@ class TestSignalEndpoint:
             assert "/USDT" in text
             assert "Analysis" in text
 
-    def test_signal_html_chart(self):
-        """Verify signal endpoint returns HTML when include_chart=html."""
-        response = client.get("/api/v1/signal/BTC?timeframe=4h&include_chart=html")
-
-        if response.status_code == 200:
-            assert "text/html" in response.headers.get("content-type", "")
-            assert "<!DOCTYPE html>" in response.text
-            assert "TradingView" in response.text or "lightweight-charts" in response.text
-
     def test_signal_invalid_symbol(self):
         """Verify 404 for non-existent symbol."""
         response = client.get("/api/v1/signal/NOTAREALCOIN123XYZ?timeframe=4h")

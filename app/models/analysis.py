@@ -309,10 +309,9 @@ class AnalysisRequest(BaseModel):
 
     symbol: str = Field(..., description="Trading symbol (e.g., BTC, AAPL, ETH)")
     timeframe: Timeframe = Field(default=Timeframe.H4, description="Chart timeframe")
-    asset_type: Literal["crypto", "stock"] = Field(
-        default="crypto", description="Asset type for data source selection"
+    asset_type: Literal["crypto"] = Field(
+        default="crypto", description="Asset type (crypto only)"
     )
-    include_chart: bool = Field(default=True, description="Include HTML chart in response")
 
 
 class AnalysisResponse(BaseModel):
@@ -339,9 +338,6 @@ class AnalysisResponse(BaseModel):
 
     # Trading Suggestion
     suggestion: Optional[TradingSuggestion] = None
-
-    # Chart HTML (optional)
-    chart_html: Optional[str] = None
 
     # Metadata
     analyzed_at: datetime

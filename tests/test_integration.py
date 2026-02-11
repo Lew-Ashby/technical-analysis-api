@@ -232,19 +232,6 @@ class TestSignalEndpoint:
         response = client.get("/api/v1/signal/BTC?format=invalid")
         assert response.status_code == 422  # Validation error
 
-    def test_signal_endpoint_with_chart_data(self):
-        """Test signal endpoint with chart data included."""
-        response = client.get("/api/v1/signal/BTC?include_chart=data")
-
-        # Accept 200 (success) or 402 (payment required) or 429/500 (rate limited)
-        assert response.status_code in [200, 402, 429, 500, 504]
-
-        if response.status_code == 200:
-            data = response.json()
-            assert "chart_data" in data
-            if data["chart_data"]:
-                assert "candles" in data["chart_data"]
-
 
 class TestHealthEndpoint:
     """Test health check endpoint."""

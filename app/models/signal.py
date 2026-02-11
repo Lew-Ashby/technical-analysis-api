@@ -85,13 +85,6 @@ class TradeInfo(BaseModel):
     invalidation: str
 
 
-class ChartDataInfo(BaseModel):
-    """Optional chart data for visualization."""
-
-    candles: List[dict]
-    indicators: dict
-
-
 class SignalResponse(BaseModel):
     """Complete signal response matching APIX specification."""
 
@@ -107,4 +100,3 @@ class SignalResponse(BaseModel):
     levels: LevelsInfo
     trade: TradeInfo
     summary: str
-    chart_data: Optional[ChartDataInfo] = None

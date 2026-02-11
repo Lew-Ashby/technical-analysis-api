@@ -1,9 +1,8 @@
 """Application configuration."""
 import logging
-import os
 from typing import List
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -24,12 +23,21 @@ class Settings(BaseSettings):
     # Note: x402 payments are handled by APIX platform
     # Configure pricing and wallet address in the APIX dashboard
 
-    # CORS Settings
-    cors_origins: List[str] = Field(
-        default_factory=lambda: os.getenv(
-            "CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000"
-        ).split(",")
-    )
+    # CORS Settings (comma-separated string in .env)
+    cors_origins: str = "http://localhost:8000,http://127.0.0.1:8000"
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Handle both string and list inputs."""
+        if isinstance(v, list):
+            return ",".join(v)
+        return v
+
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Return CORS origins as a list."""
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
     # Rate Limiting (requests per minute)
     rate_limit_signal: int = 60  # Signal endpoint

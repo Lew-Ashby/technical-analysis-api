@@ -1,6 +1,6 @@
 """Chart data models."""
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 
@@ -25,10 +25,3 @@ class ChartData(BaseModel):
     last_updated: datetime
 
 
-class ChartResponse(BaseModel):
-    """Response containing chart HTML."""
-
-    symbol: str
-    timeframe: str
-    chart_html: str
-    indicators_html: Optional[str] = None

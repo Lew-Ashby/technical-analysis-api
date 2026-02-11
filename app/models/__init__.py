@@ -24,13 +24,12 @@ from app.models.analysis import (
     VolumeState,
     VWAPAnalysis,
 )
-from app.models.chart import ChartData, ChartResponse, OHLCV
+from app.models.chart import ChartData, OHLCV
 
 __all__ = [
     "AnalysisRequest",
     "AnalysisResponse",
     "ChartData",
-    "ChartResponse",
     "CompositeSignal",
     "EMARibbon",
     "Indicator",
