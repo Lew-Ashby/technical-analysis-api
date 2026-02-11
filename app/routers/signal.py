@@ -4,6 +4,7 @@ from typing import Literal, Union
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse
+import httpx
 
 from app.config import settings
 from app.middleware.security import limiter
@@ -70,20 +71,32 @@ async def get_signal(
 
     provider = get_provider(api_key=settings.coingecko_api_key or None)
 
-    chart_data = await provider.fetch_ohlcv(
-        symbol=symbol,
-        timeframe=timeframe,
-        limit=200,
-    )
-
-    if not chart_data.candles:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No data found for symbol: {symbol}",
+    try:
+        chart_data = await provider.fetch_ohlcv(
+            symbol=symbol,
+            timeframe=timeframe,
+            limit=200,
         )
 
-    current_price = await provider.get_current_price(symbol)
-    price_change, price_change_pct = await provider.get_price_change_24h(symbol)
+        if not chart_data.candles:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No data found for symbol: {symbol}",
+            )
+
+        current_price = await provider.get_current_price(symbol)
+        price_change, price_change_pct = await provider.get_price_change_24h(symbol)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 429:
+            logger.warning(f"Rate limited by data provider for {symbol}")
+            raise HTTPException(
+                status_code=503,
+                detail="Data provider temporarily unavailable. Please try again in a few seconds.",
+            )
+        raise HTTPException(
+            status_code=502,
+            detail=f"Data provider error: {e.response.status_code}",
+        )
 
     analyzer = TechnicalAnalyzer(chart_data)
     indicators = analyzer.get_technical_indicators()
