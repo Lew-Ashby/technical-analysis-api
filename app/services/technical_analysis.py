@@ -1028,6 +1028,10 @@ class TechnicalAnalyzer:
                     take_profit_2 = sorted_res[1].price * 0.995
                 if len(sorted_res) > 2 and sorted_res[2].price > entry_price:
                     take_profit_3 = sorted_res[2].price * 0.995
+
+            # Ensure TPs are in correct order for LONG: TP1 < TP2 < TP3 (closest to furthest)
+            tps = sorted([take_profit_1, take_profit_2, take_profit_3])
+            take_profit_1, take_profit_2, take_profit_3 = tps[0], tps[1], tps[2]
         else:
             # For short: stop above recent resistance or 1.5x ATR above entry
             if resistances:
@@ -1056,6 +1060,10 @@ class TechnicalAnalyzer:
                     take_profit_2 = min(take_profit_2, sorted_sup[1].price * 1.005)
                 if len(sorted_sup) > 2 and sorted_sup[2].price < entry_price:
                     take_profit_3 = min(take_profit_3, sorted_sup[2].price * 1.005)
+
+            # Ensure TPs are in correct order for SHORT: TP1 > TP2 > TP3 (closest to furthest)
+            tps = sorted([take_profit_1, take_profit_2, take_profit_3], reverse=True)
+            take_profit_1, take_profit_2, take_profit_3 = tps[0], tps[1], tps[2]
 
         # Calculate risk metrics
         risk_amount = abs(entry_price - stop_loss)
