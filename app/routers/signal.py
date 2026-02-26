@@ -321,9 +321,10 @@ async def post_technical_analysis_v2(request: Request):
                     logger.info(f"[APIX V2] Parsing query field: {query_string}")
                     parsed_query = parse_apix_query_field(query_string)
                     logger.info(f"[APIX V2] Parsed params: {parsed_query}")
-                    symbol = parsed_query.get("symbol")
-                    if parsed_query.get("timeframe"):
-                        timeframe = parsed_query.get("timeframe")
+                    # APIX sends "base" instead of "symbol", "interval" instead of "timeframe"
+                    symbol = parsed_query.get("symbol") or parsed_query.get("base")
+                    if parsed_query.get("timeframe") or parsed_query.get("interval"):
+                        timeframe = parsed_query.get("timeframe") or parsed_query.get("interval")
                     if parsed_query.get("format"):
                         format_type = parsed_query.get("format")
                 else:
