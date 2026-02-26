@@ -103,6 +103,7 @@ async def _generate_signal(
 
 @router.get(
     "/signal",
+    response_model=None,  # Disable auto response model - we return multiple types
     responses={
         200: {"description": "Signal analysis complete"},
         404: {"description": "Symbol not found or no data available"},
@@ -128,7 +129,7 @@ async def get_signal_query(
         default="json",
         description="Response format: json or text",
     ),
-) -> Union[SignalResponse, PlainTextResponse]:
+):
     """
     Get trading signal analysis (query parameter version).
 
@@ -153,7 +154,7 @@ async def get_signal_query(
 
 @router.get(
     "/signal/{symbol}",
-    response_model=SignalResponse,
+    response_model=None,  # Disable auto response model - we return multiple types
     responses={
         200: {"description": "Signal analysis complete"},
         404: {"description": "Symbol not found or no data available"},
@@ -177,7 +178,7 @@ async def get_signal(
         default="json",
         description="Response format: json or text",
     ),
-) -> Union[SignalResponse, PlainTextResponse]:
+):
     """
     Get trading signal analysis (path parameter version).
 
